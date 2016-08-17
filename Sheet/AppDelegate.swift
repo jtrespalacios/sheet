@@ -17,7 +17,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
   func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
     let window = UIWindow()
-    let vc = ViewController(nibName: nil, bundle: nil)
+    let vc = SheetViewController(nibName: nil, bundle: nil)
     let nav = UINavigationController(rootViewController: vc)
     window.rootViewController = nav
     self.window = window
