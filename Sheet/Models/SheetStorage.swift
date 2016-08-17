@@ -8,19 +8,25 @@
 
 import Foundation
 
-struct SheetStorage {
-  enum Error: ErrorType {
+public struct SheetStorage {
+
+  static let defaultDimension = 8
+  public enum Error: ErrorType {
     case outOfBoundsAccess
   }
-  static let defaultDimension = 8
-  var columns: Int
-  var rows: Int
-  var data: [[String?]]
 
-  init(columns: Int = SheetStorage.defaultDimension, rows: Int = SheetStorage.defaultDimension, data: [[String?]]? = nil, initialValue: String? = nil) {
+  public var columns: Int
+  public var rows: Int
+  private var data: [Coordinate: String]
+
+  init(columns: Int = SheetStorage.defaultDimension, rows: Int = SheetStorage.defaultDimension, data: [Coordinate: String]? = nil) {
     self.columns = columns
     self.rows = rows
-    self.data = Array<[String?]>(count: columns, repeatedValue: Array<String?>(count: rows, repeatedValue: initialValue))
+    if let data = data {
+      self.data = data
+    } else {
+      self.data = [Coordinate: String]()
+    }
   }
 
   func getValue(fromColumn column: Int, row: Int) throws -> String? {
@@ -28,6 +34,34 @@ struct SheetStorage {
       row >= 0 && row < self.rows else {
         throw Error.outOfBoundsAccess
     }
-    return self.data[column][row]
+    let coordinate = Coordinate(row: row, column: column)
+    return self.data[coordinate]
   }
+
+  mutating func setValue(atRow row: Int, column: Int, content: String?) throws {
+    guard column >= 0 && column < self.columns &&
+      row >= 0 && row < self.rows else {
+        throw Error.outOfBoundsAccess
+    }
+    let coordinate = Coordinate(row: row, column: column)
+    guard let content = content else {
+      self.data.removeValueForKey(coordinate)
+      return
+    }
+    self.data[coordinate] = content
+  }
+}
+
+
+public struct Coordinate: Hashable, Equatable {
+  public let row: Int
+  public let column: Int
+
+  public var hashValue: Int {
+    return (51 + self.row.hashValue) * 51 + self.column.hashValue
+  }
+}
+
+public func ==(lhs: Coordinate, rhs: Coordinate) -> Bool {
+  return lhs.row == rhs.row && lhs.column == rhs.column
 }

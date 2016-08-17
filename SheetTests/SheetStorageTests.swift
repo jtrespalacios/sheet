@@ -25,20 +25,6 @@ class SheetTests: XCTestCase {
     }
   }
 
-  func testSheetStorageProvidedDefaultValue() {
-    let storage = SheetStorage(initialValue: "")
-    for c in 0 ..< 8 {
-      for r in 0 ..< 8 {
-        do {
-          let value = try storage.getValue(fromColumn: c, row: r)
-          XCTAssertEqual(value, "", "Value at (\(c), \(r)) should be the empty string")
-        } catch {
-          XCTFail("Out of bounds access should not be thrown")
-        }
-      }
-    }
-  }
-
   func testCustomDimensionSheetStorage() {
     let columns = 5
     let rows = 3
@@ -72,6 +58,36 @@ class SheetTests: XCTestCase {
       XCTFail("Accessing an out of bounds row should have thrown an exception")
     } catch {
       print("Failed to access out of bounds row")
+    }
+  }
+
+  func testSettingValue() {
+    let testValue = "Test"
+    var storage = SheetStorage()
+    try! storage.setValue(atRow: 0, column: 0, content: testValue)
+    let value = try! storage.getValue(fromColumn: 0, row: 0)
+    XCTAssertEqual(testValue, value, "The value written to the coordinate should be the same as the one retrieved")
+  }
+
+  func testSettingAtOutOfBoundsRow() {
+    let testValue = "Test"
+    var storage = SheetStorage()
+    do {
+      try storage.setValue(atRow: 100, column: 4, content: testValue)
+      XCTFail("Setting a value at an out of range index should throw an exception")
+    } catch {
+      print("Failed to set value at out of bounds index")
+    }
+  }
+
+  func testSettingAtOutOfBoundsColumn() {
+    let testValue = "Test"
+    var storage = SheetStorage()
+    do {
+      try storage.setValue(atRow: 4, column: 100, content: testValue)
+      XCTFail("Setting a value at an out of range index should throw an exception")
+    } catch {
+      print("Failed to set value at out of bounds index")
     }
   }
 }
