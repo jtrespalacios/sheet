@@ -20,6 +20,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     let vc = SheetViewController(nibName: nil, bundle: nil)
     let nav = UINavigationController(rootViewController: vc)
     window.rootViewController = nav
+    window.tintColor = .redColor()
     self.window = window
     self.window?.makeKeyAndVisible()
     return true
