@@ -12,7 +12,7 @@
 		96094FB71D652EE6008DC968 /* SheetCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96094FB61D652EE6008DC968 /* SheetCell.swift */; };
 		96094FB91D653242008DC968 /* UIView+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96094FB81D653242008DC968 /* UIView+Helpers.swift */; };
 		96094FBB1D65493A008DC968 /* EditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96094FBA1D65493A008DC968 /* EditView.swift */; };
-		9677856C1D65006100A69E61 /* Readme.markdown in Sources */ = {isa = PBXBuildFile; fileRef = 9677856B1D65006100A69E61 /* Readme.markdown */; };
+		96094FBF1D6659C3008DC968 /* SheetUndoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96094FBE1D6659C3008DC968 /* SheetUndoManager.swift */; };
 		96FA55951D63F2AA00B9391F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96FA55941D63F2AA00B9391F /* AppDelegate.swift */; };
 		96FA559D1D63F2AA00B9391F /* Sheet.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 96FA559B1D63F2AA00B9391F /* Sheet.xcdatamodeld */; };
 		96FA559F1D63F2AA00B9391F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 96FA559E1D63F2AA00B9391F /* Assets.xcassets */; };
@@ -38,6 +38,7 @@
 		96094FB61D652EE6008DC968 /* SheetCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SheetCell.swift; sourceTree = "<group>"; };
 		96094FB81D653242008DC968 /* UIView+Helpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIView+Helpers.swift"; sourceTree = "<group>"; };
 		96094FBA1D65493A008DC968 /* EditView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EditView.swift; sourceTree = "<group>"; };
+		96094FBE1D6659C3008DC968 /* SheetUndoManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SheetUndoManager.swift; sourceTree = "<group>"; };
 		9677856B1D65006100A69E61 /* Readme.markdown */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = Readme.markdown; sourceTree = "<group>"; };
 		96FA55911D63F2A900B9391F /* Sheet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sheet.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		96FA55941D63F2AA00B9391F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -124,6 +125,7 @@
 			isa = PBXGroup;
 			children = (
 				96FA55BE1D63FA5100B9391F /* SheetStorage.swift */,
+				96094FBE1D6659C3008DC968 /* SheetUndoManager.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -260,7 +262,7 @@
 			files = (
 				96FA55BC1D63F8C900B9391F /* SheetViewController.swift in Sources */,
 				96FA559D1D63F2AA00B9391F /* Sheet.xcdatamodeld in Sources */,
-				9677856C1D65006100A69E61 /* Readme.markdown in Sources */,
+				96094FBF1D6659C3008DC968 /* SheetUndoManager.swift in Sources */,
 				96FA55BF1D63FA5100B9391F /* SheetStorage.swift in Sources */,
 				96FA55951D63F2AA00B9391F /* AppDelegate.swift in Sources */,
 				96094FBB1D65493A008DC968 /* EditView.swift in Sources */,

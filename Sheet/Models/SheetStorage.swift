@@ -60,6 +60,16 @@ public struct Coordinate: Hashable, Equatable {
   public var hashValue: Int {
     return (51 + self.row.hashValue) * 51 + self.column.hashValue
   }
+
+  init(row: Int, column: Int) {
+    self.row = row
+    self.column = column
+  }
+
+  init(indexPath: NSIndexPath) {
+    self.row = indexPath.section
+    self.column = indexPath.item
+  }
 }
 
 public func ==(lhs: Coordinate, rhs: Coordinate) -> Bool {

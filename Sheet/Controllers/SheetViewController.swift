@@ -8,23 +8,31 @@
 
 import UIKit
 
+protocol UndoManager {
+  func logChange(atCoordinate coordinate: Coordinate, value: String?)
+  func lastValue(forCoordinate coordinate: Coordinate) -> String?
+  func historyAvailable(forCoordinate coordinate: Coordinate) -> Bool
+}
+
 class SheetViewController: UIViewController {
   weak var toolbar: UIToolbar!
   weak var undoButton: UIBarButtonItem!
   weak var collectionView: UICollectionView!
-  private weak var editView: UIView?
+  private var selectedIndexPath: Coordinate?
 
   override func loadView() {
     let view = UIView(frame: .zero)
     let undoButton = UIBarButtonItem(barButtonSystemItem: .Undo, target: self, action: #selector(SheetViewController.undo))
-    let editButton = UIBarButtonItem(barButtonSystemItem: .Edit, target: self, action: #selector(SheetViewController.edit))
     let spaceItem = UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
     let toolbar = UIToolbar(frame: .zero)
     let layout = SheetLayout()
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
 
     collectionView.translatesAutoresizingMaskIntoConstraints = false
-    toolbar.items = [editButton, spaceItem, undoButton]
+    collectionView.allowsSelection = true
+    collectionView.allowsMultipleSelection = false
+    undoButton.enabled = false
+    toolbar.items = [spaceItem, undoButton]
     toolbar.translatesAutoresizingMaskIntoConstraints = false
     view.addSubview(toolbar)
     view.addSubview(collectionView)
@@ -48,39 +56,31 @@ class SheetViewController: UIViewController {
     self.view.addConstraints(visualFormatStrings: formatStrings, options: [], metrics: nil, views: views)
     self.collectionView.registerClass(SheetCell.self, forCellWithReuseIdentifier: SheetCell.reuseIdentifier)
     self.collectionView.dataSource = self
+    self.collectionView.delegate = self
   }
 
   func undo() { }
-  func edit() {
-    guard self.editView == nil else {
+}
+
+extension SheetViewController: UICollectionViewDelegate {
+  func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+    if let sip = self.selectedIndexPath where sip.row == indexPath.section && sip.column == indexPath.item {
+      collectionView.deselectItemAtIndexPath(indexPath, animated: true)
+      self.selectedIndexPath = nil
       return
     }
-    let editView = EditView(title: "Edit Cell")
-    editView.hidden = true
-    self.view.addSubview(editView)
-    editView.widthAnchor.constraintEqualToConstant(275).active = true
-    editView.heightAnchor.constraintEqualToConstant(160).active = true
-    self.view.centerXAnchor.constraintEqualToAnchor(editView.centerXAnchor).active = true
-    self.view.centerYAnchor.constraintEqualToAnchor(editView.centerYAnchor).active = true
-    editView.setNeedsLayout()
-    editView.layoutIfNeeded()
-    editView.delegate = self
-    self.editView = editView
-    UIView.transitionWithView(self.view,
-                              duration: 0.2,
-                              options: [.TransitionCrossDissolve, .CurveEaseOut],
-                              animations: { editView.hidden = false },
-                              completion: { _ in editView.becomeFirstResponder() })
+    self.selectedIndexPath = Coordinate(indexPath: indexPath)
+    print("Selected \(indexPath)")
   }
 }
 
 extension SheetViewController: UICollectionViewDataSource {
   func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
-    return 5
+    return 12
   }
 
   func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-    return 5
+    return 12
   }
 
   func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
@@ -90,19 +90,17 @@ extension SheetViewController: UICollectionViewDataSource {
     return cell
   }
 }
-
+/* Rework into EditCellDelegate
 extension SheetViewController: EditViewDelegate {
   func completedEditing(inView view: EditView, resolution: EditView.Resolution) {
     let res: String
     switch resolution {
     case .commit(.Some(let value)):
       res = "commit value \(value)"
-    case .commit(nil):
+    case .commit(.None):
       res = "clear value at location"
     case .cancel:
       res = "canceled"
-    default:
-      res = "the imposible happened"
     }
     print("Edit view completed editing with resolution \(res)")
     UIView.transitionWithView(self.view,
@@ -112,3 +110,4 @@ extension SheetViewController: EditViewDelegate {
                               completion: nil)
   }
 }
+ */

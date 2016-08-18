@@ -10,7 +10,6 @@ import UIKit
 
 class SheetCell: UICollectionViewCell {
   static let reuseIdentifier = "co.j3p.Sheet.SheetCell"
-  
   weak var textLabel: UILabel!
 
   override init(frame: CGRect) {
@@ -23,12 +22,18 @@ class SheetCell: UICollectionViewCell {
     self.contentView.addConstraints(visualFormatStrings: formatStrings, options: [], metrics: nil, views: ["lb": label])
     label.centerXAnchor.constraintEqualToAnchor(self.contentView.centerXAnchor).active = true
     label.centerYAnchor.constraintEqualToAnchor(self.contentView.centerYAnchor).active = true
-    self.contentView.layer.borderColor = UIColor.darkGrayColor().CGColor
-    self.contentView.layer.borderWidth = 1
-    self.backgroundColor = UIColor.whiteColor()
+    self.backgroundView = UIView(frame: self.bounds)
+    self.backgroundView?.layer.borderColor = UIColor.darkGrayColor().CGColor
+    self.backgroundView?.layer.borderWidth = 1
+    self.backgroundView?.backgroundColor = UIColor.whiteColor()
+    self.selectedBackgroundView = UIView(frame: self.bounds)
+    self.selectedBackgroundView?.layer.borderColor = UIColor.orangeColor().CGColor
+    self.selectedBackgroundView?.layer.borderWidth = 1
+    self.selectedBackgroundView?.backgroundColor = UIColor.whiteColor()
   }
 
   override func prepareForReuse() {
+    super.prepareForReuse()
     self.textLabel.text = nil
   }
 
