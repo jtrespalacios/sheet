@@ -21,12 +21,13 @@ class SheetViewController: UIViewController {
     let layout = SheetLayout()
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
 
-    view.backgroundColor = UIColor.whiteColor()
+    collectionView.translatesAutoresizingMaskIntoConstraints = false
     toolbar.items = [spaceItem, undoButton]
+    toolbar.translatesAutoresizingMaskIntoConstraints = false
     view.addSubview(toolbar)
     view.addSubview(collectionView)
-    collectionView.translatesAutoresizingMaskIntoConstraints = false
-    toolbar.translatesAutoresizingMaskIntoConstraints = false
+    view.backgroundColor = UIColor.whiteColor()
+
     self.view = view
     self.undoButton = undoButton
     self.collectionView = collectionView
@@ -41,28 +42,29 @@ class SheetViewController: UIViewController {
       "tb": self.toolbar,
       "tlg": self.topLayoutGuide as AnyObject
     ]
-    let formatStrings = [
-      "H:|[tb]|", "H:|[cv]|", "V:|[cv][tb]|"
-    ]
-    self.view.addConstraints(formatStrings, options: [], metrics: nil, views: views)
+    let formatStrings = [ "H:|[tb]|", "H:|[cv]|", "V:|[cv][tb]|" ]
+    self.view.addConstraints(visualFormatStrings: formatStrings, options: [], metrics: nil, views: views)
+    self.collectionView.registerClass(SheetCell.self, forCellWithReuseIdentifier: SheetCell.reuseIdentifier)
+    self.collectionView.dataSource = self
   }
 
-  override func didReceiveMemoryWarning() {
-    super.didReceiveMemoryWarning()
-    // Dispose of any resources that can be recreated.
-  }
-
-  func undo() {
-
-  }
+  func undo() { }
 }
 
-extension UIView {
-  public func addConstraints(visualFormatStrings: [String], options opts: NSLayoutFormatOptions, metrics: [String: AnyObject]?, views: [String: AnyObject]) {
-    for s in visualFormatStrings {
-      self.addConstraints(
-        NSLayoutConstraint.constraintsWithVisualFormat(s, options: opts, metrics: metrics, views: views)
-      )
+extension SheetViewController: UICollectionViewDataSource {
+  func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
+    return 5
+  }
+
+  func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    return 5
+  }
+
+  func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+    guard let cell = collectionView.dequeueReusableCellWithReuseIdentifier(SheetCell.reuseIdentifier, forIndexPath: indexPath) as? SheetCell else {
+      fatalError("Did not get the correct kind of cell")
     }
+    cell.textLabel.text = "Hello"
+    return cell
   }
 }
