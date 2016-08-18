@@ -44,7 +44,7 @@ class SheetViewController: UIViewController {
       "tb": self.toolbar,
       "tlg": self.topLayoutGuide as AnyObject
     ]
-    let formatStrings = [ "H:|[tb]|", "H:|[cv]|", "V:|[cv][tb]|" ]
+    let formatStrings = [ "H:|[tb]|", "H:|[cv]|", "V:[tlg][cv][tb]|" ]
     self.view.addConstraints(visualFormatStrings: formatStrings, options: [], metrics: nil, views: views)
     self.collectionView.registerClass(SheetCell.self, forCellWithReuseIdentifier: SheetCell.reuseIdentifier)
     self.collectionView.dataSource = self
@@ -87,7 +87,6 @@ extension SheetViewController: UICollectionViewDataSource {
     guard let cell = collectionView.dequeueReusableCellWithReuseIdentifier(SheetCell.reuseIdentifier, forIndexPath: indexPath) as? SheetCell else {
       fatalError("Did not get the correct kind of cell")
     }
-    cell.textLabel.text = "Hello"
     return cell
   }
 }
