@@ -8,7 +8,13 @@
 
 import UIKit
 
-class SheetCell: UICollectionViewCell {
+class SpreadSheetCell: UICollectionViewCell {
+  func setText(value: String?) {
+    fatalError("Implement in subclass")
+  }
+}
+
+class SheetCell: SpreadSheetCell {
   static let reuseIdentifier = "co.j3p.Sheet.SheetCell"
   weak var textLabel: UILabel!
 
@@ -26,10 +32,6 @@ class SheetCell: UICollectionViewCell {
     self.backgroundView?.layer.borderColor = UIColor.darkGrayColor().CGColor
     self.backgroundView?.layer.borderWidth = 1
     self.backgroundView?.backgroundColor = UIColor.whiteColor()
-    self.selectedBackgroundView = UIView(frame: self.bounds)
-    self.selectedBackgroundView?.layer.borderColor = UIColor.orangeColor().CGColor
-    self.selectedBackgroundView?.layer.borderWidth = 1
-    self.selectedBackgroundView?.backgroundColor = UIColor.whiteColor()
   }
 
   override func prepareForReuse() {
@@ -40,5 +42,8 @@ class SheetCell: UICollectionViewCell {
   required init?(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
-  
+
+  override func setText(value: String?) {
+    self.textLabel.text = value
+  }
 }

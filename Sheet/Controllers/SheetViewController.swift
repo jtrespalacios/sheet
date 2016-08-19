@@ -27,10 +27,11 @@ class SheetViewController: UIViewController {
     let toolbar = UIToolbar(frame: .zero)
     let layout = SheetLayout()
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-
+    
     collectionView.translatesAutoresizingMaskIntoConstraints = false
     collectionView.allowsSelection = true
     collectionView.allowsMultipleSelection = false
+    collectionView.bounces = false
     undoButton.enabled = false
     toolbar.items = [spaceItem, undoButton]
     toolbar.translatesAutoresizingMaskIntoConstraints = false
@@ -55,6 +56,7 @@ class SheetViewController: UIViewController {
     let formatStrings = [ "H:|[tb]|", "H:|[cv]|", "V:[tlg][cv][tb]|" ]
     self.view.addConstraints(visualFormatStrings: formatStrings, options: [], metrics: nil, views: views)
     self.collectionView.registerClass(SheetCell.self, forCellWithReuseIdentifier: SheetCell.reuseIdentifier)
+    self.collectionView.registerClass(SheetEditCell.self, forCellWithReuseIdentifier: SheetEditCell.reuseIdentifier)
     self.collectionView.dataSource = self
     self.collectionView.delegate = self
   }
@@ -64,13 +66,23 @@ class SheetViewController: UIViewController {
 
 extension SheetViewController: UICollectionViewDelegate {
   func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
-    if let sip = self.selectedIndexPath where sip.row == indexPath.section && sip.column == indexPath.item {
-      collectionView.deselectItemAtIndexPath(indexPath, animated: true)
-      self.selectedIndexPath = nil
-      return
+    var indexPathsToReload = [indexPath]
+    if let sip = self.selectedIndexPath {
+      if  sip.row == indexPath.section && sip.column == indexPath.item {
+        self.selectedIndexPath = nil
+      } else {
+        indexPathsToReload.append(NSIndexPath(forItem: sip.column, inSection: sip.row))
+        self.selectedIndexPath = Coordinate(indexPath: indexPath)
+      }
+    } else {
+      self.selectedIndexPath = Coordinate(indexPath: indexPath)
     }
-    self.selectedIndexPath = Coordinate(indexPath: indexPath)
-    print("Selected \(indexPath)")
+
+    self.collectionView.reloadItemsAtIndexPaths(indexPathsToReload)
+  }
+
+  func collectionView(collectionView: UICollectionView, didDeselectItemAtIndexPath indexPath: NSIndexPath) {
+    self.collectionView.reloadItemsAtIndexPaths([indexPath])
   }
 }
 
@@ -84,15 +96,38 @@ extension SheetViewController: UICollectionViewDataSource {
   }
 
   func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
-    guard let cell = collectionView.dequeueReusableCellWithReuseIdentifier(SheetCell.reuseIdentifier, forIndexPath: indexPath) as? SheetCell else {
+    let coordinate = Coordinate(indexPath: indexPath)
+    let reuseId: String
+    if coordinate == self.selectedIndexPath {
+      reuseId = SheetEditCell.reuseIdentifier
+    }
+    else {
+      reuseId = SheetCell.reuseIdentifier
+    }
+
+    guard let cell = collectionView.dequeueReusableCellWithReuseIdentifier(reuseId, forIndexPath: indexPath) as? SpreadSheetCell else {
       fatalError("Did not get the correct kind of cell")
     }
+
+    if let editCell =  cell as? SheetEditCell {
+      editCell.delegate = self
+      dispatch_async(dispatch_get_main_queue()) {
+        editCell.becomeFirstResponder()
+      }
+    }
+    cell.setText("")
+    
     return cell
   }
 }
-/* Rework into EditCellDelegate
-extension SheetViewController: EditViewDelegate {
-  func completedEditing(inView view: EditView, resolution: EditView.Resolution) {
+
+extension SheetViewController: SheetEditCellDelegate {
+  func completedEditing(inView view: SheetEditCell, resolution: SheetEditCell.Resolution) {
+    view.resignFirstResponder()
+    guard let coordinate = self.selectedIndexPath else {
+      return
+    }
+
     let res: String
     switch resolution {
     case .commit(.Some(let value)):
@@ -102,12 +137,9 @@ extension SheetViewController: EditViewDelegate {
     case .cancel:
       res = "canceled"
     }
-    print("Edit view completed editing with resolution \(res)")
-    UIView.transitionWithView(self.view,
-                              duration: 0.2,
-                              options: [.CurveEaseIn, .TransitionCrossDissolve],
-                              animations: { view.removeFromSuperview() },
-                              completion: nil)
+    print("Edit Resolved \(res)")
+    let indexPath = NSIndexPath(forItem: coordinate.column, inSection: coordinate.row)
+    self.selectedIndexPath = nil
+    self.collectionView.reloadItemsAtIndexPaths([indexPath])
   }
 }
- */
