@@ -111,7 +111,9 @@ class SheetViewController: UIViewController {
       self.storage.addRow()
       let newRow = self.storage.rows - 1
       self.collectionView.insertSections(NSIndexSet(index: newRow))
-      }, completion: nil)
+      }, completion: { _ in
+        self.collectionView.flashScrollIndicators()
+    })
   }
 
   func addColumn() {
@@ -123,7 +125,9 @@ class SheetViewController: UIViewController {
         newIndexes.append(NSIndexPath(forItem: newColumn, inSection: i))
       }
       self.collectionView.insertItemsAtIndexPaths(newIndexes)
-      }, completion: nil)
+      }, completion: { _ in
+        self.collectionView.flashScrollIndicators()
+    })
   }
 }
 
@@ -172,16 +176,16 @@ extension SheetViewController: UICollectionViewDataSource {
       fatalError("Did not get the correct kind of cell")
     }
 
+    let coord = Coordinate(indexPath: indexPath)
+    if let value = try? self.storage.getValue(fromCoordinate: coord) {
+      cell.setText(value)
+    }
+
     if let editCell =  cell as? SheetEditCell {
       editCell.delegate = self
       dispatch_async(dispatch_get_main_queue()) {
         editCell.becomeFirstResponder()
       }
-    }
-
-    let coord = Coordinate(indexPath: indexPath)
-    if let value = try? self.storage.getValue(fromCoordinate: coord) {
-      cell.setText(value)
     }
 
     return cell
