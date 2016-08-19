@@ -71,7 +71,7 @@ extension SheetViewController: UICollectionViewDelegate {
       if  sip.row == indexPath.section && sip.column == indexPath.item {
         self.selectedIndexPath = nil
       } else {
-        indexPathsToReload.append(NSIndexPath(forItem: sip.column, inSection: sip.row))
+        indexPathsToReload.append(NSIndexPath(coordinate: sip))
         self.selectedIndexPath = Coordinate(indexPath: indexPath)
       }
     } else {

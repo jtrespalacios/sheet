@@ -75,3 +75,9 @@ public struct Coordinate: Hashable, Equatable {
 public func ==(lhs: Coordinate, rhs: Coordinate) -> Bool {
   return lhs.row == rhs.row && lhs.column == rhs.column
 }
+
+extension NSIndexPath {
+  convenience init(coordinate: Coordinate) {
+    self.init(forItem: coordinate.column, inSection: coordinate.row)
+  }
+}
