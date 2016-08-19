@@ -10,8 +10,9 @@ import UIKit
 
 protocol UndoManager {
   func logChange(atCoordinate coordinate: Coordinate, value: String?)
-  func lastValue(forCoordinate coordinate: Coordinate) -> String?
-  func historyAvailable(forCoordinate coordinate: Coordinate) -> Bool
+  func lastValue() -> (Coordinate, String?)?
+  func historyAvailable() -> Bool
+  func clearHistory()
 }
 
 class SheetViewController: UIViewController {
@@ -89,7 +90,15 @@ class SheetViewController: UIViewController {
     }
   }
 
-  func undo() { }
+  func undo() {
+    guard let (coordinate, value) = self.sheetUndoManager.lastValue() else {
+      return
+    }
+    let indexPath = NSIndexPath(coordinate: coordinate)
+    _ = try? self.storage.setValue(atCoordinate: coordinate, content: value)
+    self.collectionView.reloadItemsAtIndexPaths([indexPath])
+    self.undoButton.enabled = self.sheetUndoManager.historyAvailable()
+  }
 
   func save() {
     if !SheetSerializer.writeToDisk(self.storage) {
@@ -189,6 +198,7 @@ extension SheetViewController: SheetEditCellDelegate {
     func savePreviousValueToHistory() {
       if let previousValue = try? self.storage.getValue(fromCoordinate: coordinate) {
         self.sheetUndoManager.logChange(atCoordinate: coordinate, value: previousValue)
+        self.undoButton.enabled = self.sheetUndoManager.historyAvailable()
       }
     }
 
