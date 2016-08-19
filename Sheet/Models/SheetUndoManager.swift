@@ -38,6 +38,10 @@ class SheetUndoManager: UndoManager {
     return value
   }
 
+  func clearHistory() {
+    self.undoStack = [Coordinate: [String?]]()
+  }
+
   func historyAvailable(forCoordinate coordinate: Coordinate) -> Bool {
     return self.undoStack[coordinate] != nil
   }

@@ -71,4 +71,13 @@ class SheetHistoryTests: XCTestCase {
     XCTAssertFalse(coordOneHasHistory, "After clearing all values from manager, there should be no history available")
     XCTAssertFalse(coordTwoHasHistory, "After clearing all values from manager, there should be no history available")
   }
+
+  func testClearingUndoHistory() {
+    let coord = Coordinate(row: 0, column: 0)
+    let value = "Test"
+    self.sheetUndoManager.logChange(atCoordinate: coord, value: value)
+    self.sheetUndoManager.clearHistory()
+    let hasHistory = self.sheetUndoManager.historyAvailable(forCoordinate: coord)
+    XCTAssertFalse(hasHistory, "After clearing history there should be no data available")
+  }
 }
