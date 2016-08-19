@@ -15,14 +15,18 @@ protocol UndoManager {
 }
 
 class SheetViewController: UIViewController {
+  private let defaultSheetDimension = 8
   weak var toolbar: UIToolbar!
   weak var undoButton: UIBarButtonItem!
   weak var collectionView: UICollectionView!
   private var selectedLocation: Coordinate?
+  private var storage: SheetStorage!
+  private var sheetUndoManager = SheetUndoManager()
 
   override func loadView() {
     let view = UIView(frame: .zero)
     let undoButton = UIBarButtonItem(barButtonSystemItem: .Undo, target: self, action: #selector(SheetViewController.undo))
+    let saveButton = UIBarButtonItem(barButtonSystemItem: .Save, target: self, action: #selector(SheetViewController.save))
     let spaceItem = UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
     let toolbar = UIToolbar(frame: .zero)
     let layout = SheetLayout()
@@ -33,7 +37,7 @@ class SheetViewController: UIViewController {
     collectionView.allowsMultipleSelection = false
     collectionView.bounces = false
     undoButton.enabled = false
-    toolbar.items = [spaceItem, undoButton]
+    toolbar.items = [saveButton, spaceItem, undoButton]
     toolbar.translatesAutoresizingMaskIntoConstraints = false
     view.addSubview(toolbar)
     view.addSubview(collectionView)
@@ -59,9 +63,19 @@ class SheetViewController: UIViewController {
     self.collectionView.registerClass(SheetEditCell.self, forCellWithReuseIdentifier: SheetEditCell.reuseIdentifier)
     self.collectionView.dataSource = self
     self.collectionView.delegate = self
+
+    self.storage = SheetSerializer.loadFromDisk()
+    if self.storage == nil {
+      self.storage = SheetStorage(columns: self.defaultSheetDimension, rows: self.defaultSheetDimension)
+    }
   }
 
   func undo() { }
+  func save() {
+    if !SheetSerializer.writeToDisk(self.storage) {
+      print("Failed to write sheet to disk")
+    }
+  }
 }
 
 extension SheetViewController: UICollectionViewDelegate {
@@ -115,7 +129,11 @@ extension SheetViewController: UICollectionViewDataSource {
         editCell.becomeFirstResponder()
       }
     }
-    cell.setText("")
+
+    let coord = Coordinate(indexPath: indexPath)
+    if let value = try? self.storage.getValue(fromCoordinate: coord) {
+      cell.setText(value)
+    }
     
     return cell
   }
@@ -128,16 +146,23 @@ extension SheetViewController: SheetEditCellDelegate {
       return
     }
 
-    let res: String
+    func savePreviousValueToHistory() {
+      if let previousValue = try? self.storage.getValue(fromCoordinate: coordinate) {
+        self.sheetUndoManager.logChange(atCoordinate: coordinate, value: previousValue)
+      }
+    }
+
     switch resolution {
     case .commit(.Some(let value)):
-      res = "commit value \(value)"
+      savePreviousValueToHistory()
+      _ = try? self.storage.setValue(atCoordinate: coordinate, content: value)
     case .commit(.None):
-      res = "clear value at location"
+      savePreviousValueToHistory()
+      _ = try? self.storage.setValue(atCoordinate: coordinate, content: nil)
     case .cancel:
-      res = "canceled"
+      break; // do nothing
     }
-    print("Edit Resolved \(res)")
+
     let indexPath = NSIndexPath(forItem: coordinate.column, inSection: coordinate.row)
     self.selectedLocation = nil
     self.collectionView.reloadItemsAtIndexPaths([indexPath])
