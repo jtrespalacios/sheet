@@ -18,7 +18,7 @@ class SheetViewController: UIViewController {
   weak var toolbar: UIToolbar!
   weak var undoButton: UIBarButtonItem!
   weak var collectionView: UICollectionView!
-  private var selectedIndexPath: Coordinate?
+  private var selectedLocation: Coordinate?
 
   override func loadView() {
     let view = UIView(frame: .zero)
@@ -67,15 +67,15 @@ class SheetViewController: UIViewController {
 extension SheetViewController: UICollectionViewDelegate {
   func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
     var indexPathsToReload = [indexPath]
-    if let sip = self.selectedIndexPath {
+    if let sip = self.selectedLocation {
       if  sip.row == indexPath.section && sip.column == indexPath.item {
-        self.selectedIndexPath = nil
+        self.selectedLocation = nil
       } else {
         indexPathsToReload.append(NSIndexPath(coordinate: sip))
-        self.selectedIndexPath = Coordinate(indexPath: indexPath)
+        self.selectedLocation = Coordinate(indexPath: indexPath)
       }
     } else {
-      self.selectedIndexPath = Coordinate(indexPath: indexPath)
+      self.selectedLocation = Coordinate(indexPath: indexPath)
     }
 
     self.collectionView.reloadItemsAtIndexPaths(indexPathsToReload)
@@ -98,7 +98,7 @@ extension SheetViewController: UICollectionViewDataSource {
   func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
     let coordinate = Coordinate(indexPath: indexPath)
     let reuseId: String
-    if coordinate == self.selectedIndexPath {
+    if coordinate == self.selectedLocation {
       reuseId = SheetEditCell.reuseIdentifier
     }
     else {
@@ -124,7 +124,7 @@ extension SheetViewController: UICollectionViewDataSource {
 extension SheetViewController: SheetEditCellDelegate {
   func completedEditing(inView view: SheetEditCell, resolution: SheetEditCell.Resolution) {
     view.resignFirstResponder()
-    guard let coordinate = self.selectedIndexPath else {
+    guard let coordinate = self.selectedLocation else {
       return
     }
 
@@ -139,7 +139,7 @@ extension SheetViewController: SheetEditCellDelegate {
     }
     print("Edit Resolved \(res)")
     let indexPath = NSIndexPath(forItem: coordinate.column, inSection: coordinate.row)
-    self.selectedIndexPath = nil
+    self.selectedLocation = nil
     self.collectionView.reloadItemsAtIndexPaths([indexPath])
   }
 }

@@ -9,17 +9,36 @@
 import Foundation
 
 class SheetUndoManager: UndoManager {
-  var undoStack = [Coordinate: [String?]]()
+  private var undoStack = [Coordinate: [String?]]()
 
   func logChange(atCoordinate coordinate: Coordinate, value: String?) {
+    var itemHistory: [String?]
 
+    if let stack = self.undoStack[coordinate] {
+      itemHistory = stack
+    } else {
+      itemHistory = [String?]()
+    }
+    itemHistory.append(value)
+    self.undoStack[coordinate] = itemHistory
   }
 
   func lastValue(forCoordinate coordinate: Coordinate) -> String? {
-    return nil
+    var value: String?
+    if var itemHistory = self.undoStack[coordinate] {
+      if let lastValue = itemHistory.popLast() {
+        value = lastValue
+        if itemHistory.count > 0 {
+          self.undoStack[coordinate] = itemHistory
+        } else {
+          self.undoStack.removeValueForKey(coordinate)
+        }
+      }
+    }
+    return value
   }
 
   func historyAvailable(forCoordinate coordinate: Coordinate) -> Bool {
-    return false
+    return self.undoStack[coordinate] != nil
   }
 }
