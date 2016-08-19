@@ -1,0 +1,15 @@
+PODS:
+  - HamburgerButton (1.0.0)
+  - SideMenu (1.1.9)
+
+DEPENDENCIES:
+  - HamburgerButton (~> 1.0)
+  - SideMenu (~> 1.1)
+
+SPEC CHECKSUMS:
+  HamburgerButton: 91c94476e75c55b563c6a8ccdc05eda8c977fbb1
+  SideMenu: e4ecb0f1061e19230e53079edb2b300081446f80
+
+PODFILE CHECKSUM: dfd65dfe38e0c48b356c930d1835f4933730ad43
+
+COCOAPODS: 1.0.1

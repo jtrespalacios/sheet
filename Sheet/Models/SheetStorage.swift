@@ -77,6 +77,10 @@ public struct SheetStorage {
     }
     self.data[coordinate] = content
   }
+
+  mutating func clear() {
+    self.data = [Coordinate: String]()
+  }
 }
 
 

@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import SideMenu
+import HamburgerButton
 
 protocol UndoManager {
   func logChange(atCoordinate coordinate: Coordinate, value: String?)
@@ -17,19 +19,21 @@ protocol UndoManager {
 
 class SheetViewController: UIViewController {
   private let defaultSheetDimension = 8
-  weak var toolbar: UIToolbar!
-  weak var undoButton: UIBarButtonItem!
-  weak var collectionView: UICollectionView!
-  weak var addRowButton: UIButton!
-  weak var addColumnButton: UIButton!
+  private weak var toolbar: UIToolbar!
+  private weak var undoButton: UIBarButtonItem!
+  private weak var collectionView: UICollectionView!
+  private weak var addRowButton: UIButton!
+  private weak var addColumnButton: UIButton!
+  private weak var menuButton: Button!
+  private weak var menuController: MenuViewController!
   private var selectedLocation: Coordinate?
   private var storage: SheetStorage!
   private var sheetUndoManager = SheetUndoManager()
 
+
   override func loadView() {
     let view = UIView(frame: .zero)
     let undoButton = UIBarButtonItem(barButtonSystemItem: .Undo, target: self, action: #selector(SheetViewController.undo))
-    let saveButton = UIBarButtonItem(barButtonSystemItem: .Save, target: self, action: #selector(SheetViewController.save))
     let addRowButton = UIButton(type: .System)
     let addColumnButton = UIButton(type: .System)
     let spaceItem = UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
@@ -50,7 +54,7 @@ class SheetViewController: UIViewController {
     collectionView.allowsMultipleSelection = false
     collectionView.bounces = false
     undoButton.enabled = false
-    toolbar.items = [saveButton, spaceItem, undoButton]
+    toolbar.items = [spaceItem, undoButton]
     toolbar.translatesAutoresizingMaskIntoConstraints = false
     view.addSubview(toolbar)
     view.addSubview(collectionView)
@@ -84,10 +88,21 @@ class SheetViewController: UIViewController {
     self.collectionView.dataSource = self
     self.collectionView.delegate = self
 
-    self.storage = SheetSerializer.loadFromDisk()
+    self.reload()
     if self.storage == nil {
       self.storage = SheetStorage(columns: self.defaultSheetDimension, rows: self.defaultSheetDimension)
     }
+    let menuButton = Button(frame: CGRectMake(0,0,30,30))
+    menuButton.addTarget(self, action: #selector(SheetViewController.showMenu), forControlEvents: .TouchUpInside)
+    self.menuButton = menuButton
+    self.navigationItem.leftBarButtonItem = UIBarButtonItem(customView: menuButton)
+    let menuController = MenuViewController()
+    menuController.delegate = self
+    let menuLeftNavigationController = UISideMenuNavigationController(rootViewController: menuController)
+    menuLeftNavigationController.leftSide = true
+    SideMenuManager.menuWidth = UIScreen.mainScreen().bounds.width * 0.65
+    SideMenuManager.menuLeftNavigationController = menuLeftNavigationController
+    self.menuController = menuController
   }
 
   func undo() {
@@ -104,6 +119,11 @@ class SheetViewController: UIViewController {
     if !SheetSerializer.writeToDisk(self.storage) {
       print("Failed to write sheet to disk")
     }
+  }
+
+  func reload() {
+    self.storage = SheetSerializer.loadFromDisk()
+    self.clearHistory()
   }
 
   func addRow() {
@@ -128,6 +148,20 @@ class SheetViewController: UIViewController {
       }, completion: { _ in
         self.collectionView.flashScrollIndicators()
     })
+  }
+
+  func showMenu() {
+    if presentedViewController != nil {
+      self.dismissViewControllerAnimated(true, completion: nil)
+    } else {
+      menuController.sheetHasChanges = self.sheetUndoManager.historyAvailable()
+      presentViewController(SideMenuManager.menuLeftNavigationController!, animated: true, completion: nil)
+    }
+  }
+
+  func clearHistory() {
+    self.sheetUndoManager.clearHistory()
+    self.undoButton.enabled = false
   }
 }
 
@@ -220,5 +254,13 @@ extension SheetViewController: SheetEditCellDelegate {
     let indexPath = NSIndexPath(forItem: coordinate.column, inSection: coordinate.row)
     self.selectedLocation = nil
     self.collectionView.reloadItemsAtIndexPaths([indexPath])
+  }
+}
+
+extension SheetViewController: MenuViewControllerDelegate {
+  func clear() {
+    self.storage.clear()
+    self.clearHistory()
+    self.collectionView.reloadData()
   }
 }
