@@ -90,4 +90,16 @@ class SheetTests: XCTestCase {
       print("Failed to set value at out of bounds index")
     }
   }
+
+  func testAddingRow() {
+    var storage = SheetStorage()
+    storage.addRow()
+    XCTAssertTrue(storage.rows == 9, "After adding a row to a default sheet storage there should be 9 rows")
+  }
+
+  func testAddingColumn() {
+    var storage = SheetStorage()
+    storage.addColumn()
+    XCTAssertTrue(storage.columns == 9, "After adding a column to a default sheet storage there should be 9 column")
+  }
 }

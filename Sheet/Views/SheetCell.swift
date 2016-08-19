@@ -24,9 +24,8 @@ class SheetCell: SpreadSheetCell {
     super.init(frame: frame)
     self.contentView.addSubview(label)
     label.translatesAutoresizingMaskIntoConstraints = false
-    let formatStrings = ["H:|-(>=8)-[lb]-(>=8)-|", "V:|-(>=8)-[lb]-(>=8)-|"]
+    let formatStrings = ["H:|-[lb]-(>=8)-|", "V:|-(>=8)-[lb]-(>=8)-|"]
     self.contentView.addConstraints(visualFormatStrings: formatStrings, options: [], metrics: nil, views: ["lb": label])
-    label.centerXAnchor.constraintEqualToAnchor(self.contentView.centerXAnchor).active = true
     label.centerYAnchor.constraintEqualToAnchor(self.contentView.centerYAnchor).active = true
     self.backgroundView = UIView(frame: self.bounds)
     self.backgroundView?.layer.borderColor = UIColor.darkGrayColor().CGColor

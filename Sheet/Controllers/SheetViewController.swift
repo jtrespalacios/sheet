@@ -19,6 +19,8 @@ class SheetViewController: UIViewController {
   weak var toolbar: UIToolbar!
   weak var undoButton: UIBarButtonItem!
   weak var collectionView: UICollectionView!
+  weak var addRowButton: UIButton!
+  weak var addColumnButton: UIButton!
   private var selectedLocation: Coordinate?
   private var storage: SheetStorage!
   private var sheetUndoManager = SheetUndoManager()
@@ -27,11 +29,21 @@ class SheetViewController: UIViewController {
     let view = UIView(frame: .zero)
     let undoButton = UIBarButtonItem(barButtonSystemItem: .Undo, target: self, action: #selector(SheetViewController.undo))
     let saveButton = UIBarButtonItem(barButtonSystemItem: .Save, target: self, action: #selector(SheetViewController.save))
+    let addRowButton = UIButton(type: .System)
+    let addColumnButton = UIButton(type: .System)
     let spaceItem = UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
     let toolbar = UIToolbar(frame: .zero)
     let layout = SheetLayout()
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-    
+
+    addRowButton.setTitle("Add Row", forState: .Normal)
+    addRowButton.translatesAutoresizingMaskIntoConstraints = false
+    addRowButton.sizeToFit()
+    addRowButton.addTarget(self, action: #selector(SheetViewController.addRow), forControlEvents: .TouchUpInside)
+    addColumnButton.setTitle("Add Column", forState: .Normal)
+    addColumnButton.translatesAutoresizingMaskIntoConstraints = false
+    addColumnButton.sizeToFit()
+    addColumnButton.addTarget(self, action: #selector(SheetViewController.addColumn), forControlEvents: .TouchUpInside)
     collectionView.translatesAutoresizingMaskIntoConstraints = false
     collectionView.allowsSelection = true
     collectionView.allowsMultipleSelection = false
@@ -42,11 +54,15 @@ class SheetViewController: UIViewController {
     view.addSubview(toolbar)
     view.addSubview(collectionView)
     view.backgroundColor = UIColor.whiteColor()
+    view.addSubview(addRowButton)
+    view.addSubview(addColumnButton)
 
     self.view = view
     self.undoButton = undoButton
     self.collectionView = collectionView
     self.toolbar = toolbar
+    self.addRowButton = addRowButton
+    self.addColumnButton = addColumnButton
   }
 
   override func viewDidLoad() {
@@ -55,10 +71,13 @@ class SheetViewController: UIViewController {
     let views = [
       "cv": self.collectionView,
       "tb": self.toolbar,
+      "arb": self.addRowButton,
+      "acb": self.addColumnButton,
       "tlg": self.topLayoutGuide as AnyObject
     ]
-    let formatStrings = [ "H:|[tb]|", "H:|[cv]|", "V:[tlg][cv][tb]|" ]
+    let formatStrings = [ "H:|[tb]|", "H:|[cv]|", "H:[arb]-[acb]-|", "V:[tlg]-[arb]-[cv][tb]|" ]
     self.view.addConstraints(visualFormatStrings: formatStrings, options: [], metrics: nil, views: views)
+    self.addColumnButton.centerYAnchor.constraintEqualToAnchor(self.addRowButton.centerYAnchor).active = true
     self.collectionView.registerClass(SheetCell.self, forCellWithReuseIdentifier: SheetCell.reuseIdentifier)
     self.collectionView.registerClass(SheetEditCell.self, forCellWithReuseIdentifier: SheetEditCell.reuseIdentifier)
     self.collectionView.dataSource = self
@@ -71,10 +90,31 @@ class SheetViewController: UIViewController {
   }
 
   func undo() { }
+
   func save() {
     if !SheetSerializer.writeToDisk(self.storage) {
       print("Failed to write sheet to disk")
     }
+  }
+
+  func addRow() {
+    self.collectionView.performBatchUpdates({
+      self.storage.addRow()
+      let newRow = self.storage.rows - 1
+      self.collectionView.insertSections(NSIndexSet(index: newRow))
+      }, completion: nil)
+  }
+
+  func addColumn() {
+    self.collectionView.performBatchUpdates({
+      self.storage.addColumn()
+      let newColumn = self.storage.columns - 1
+      var newIndexes = [NSIndexPath]()
+      for i in 0 ..< self.storage.rows {
+        newIndexes.append(NSIndexPath(forItem: newColumn, inSection: i))
+      }
+      self.collectionView.insertItemsAtIndexPaths(newIndexes)
+      }, completion: nil)
   }
 }
 
@@ -102,11 +142,11 @@ extension SheetViewController: UICollectionViewDelegate {
 
 extension SheetViewController: UICollectionViewDataSource {
   func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
-    return 12
+    return self.storage.rows
   }
 
   func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-    return 12
+    return self.storage.columns
   }
 
   func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
@@ -134,7 +174,7 @@ extension SheetViewController: UICollectionViewDataSource {
     if let value = try? self.storage.getValue(fromCoordinate: coord) {
       cell.setText(value)
     }
-    
+
     return cell
   }
 }
