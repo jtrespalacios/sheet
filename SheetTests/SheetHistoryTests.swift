@@ -46,9 +46,12 @@ class SheetHistoryTests: XCTestCase {
     [testValue1, testValue2, testValue3].forEach { self.sheetUndoManager.logChange(atCoordinate: coord1, value: $0) }
     [testValue3, testValue2, testValue1].forEach { self.sheetUndoManager.logChange(atCoordinate: coord2, value: $0) }
 
-    let coordTwoLasValue = self.sheetUndoManager.lastValue()!
-    XCTAssertEqual(coordTwoLasValue.0, coord2, "The last value saved should be for coordinate (1, 1)")
-    XCTAssertEqual(coordTwoLasValue.1, testValue1, "The last value saved should have a string of \(testValue1)")
+    let coordTwoLastValue = self.sheetUndoManager.lastValue()!
+    XCTAssertEqual(coordTwoLastValue.0, coord2, "The last value saved should be for coordinate (1, 1)")
+    XCTAssertEqual(coordTwoLastValue.1, testValue1, "The last value saved should have a string of \(testValue1)")
+    let coordTwoPreviousToLastValue = self.sheetUndoManager.lastValue()!
+    XCTAssertEqual(coordTwoPreviousToLastValue.0, coord2, "The previous to last value saved should be for coordinate (1, 1)")
+    XCTAssertEqual(coordTwoPreviousToLastValue.1, testValue2, "The previous to last value saved should have a string of \(testValue2)")
   }
 
   func testClearingUndoHistory() {
