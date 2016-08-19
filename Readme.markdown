@@ -22,19 +22,13 @@ You are free to use any model to save the data. We have given you an example mod
 
 would represent the following table:
 
--------------------------------
+
 | 1 | | | | |
--------------------------------
 | 2 | 3 | | | |
--------------------------------
 | 4 | 5 | 6 | | |
--------------------------------
 | | | | | |
--------------------------------
 | 7 | 8 | 9 | 0 | |
--------------------------------
 | | | | | |
--------------------------------
 
 Your spreadsheet should support a minimum of 8 rows and 8 columns.
 
